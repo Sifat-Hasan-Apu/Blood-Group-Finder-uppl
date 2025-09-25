@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Blood Group Finder</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide-react@latest/dist/lucide-react.js"></script>
+
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Hind Siliguri', 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            border: 1px solid #e5e7eb;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .blood-tag {
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 14px;
+            color: #c81e1e;
+            background-color: #fee2e2;
+            border: 1px solid #fca5a5;
+        }
+        .icon {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+            margin-right: 8px;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <div class="min-h-screen container mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Header Section -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">কর্মচারী তথ্য অনুসন্ধান</h1>
+            <p class="mt-2 text-xl font-semibold text-gray-700">United Payra Power Limited</p>
+            <p class="mt-1">
+                <span class="text-xs text-gray-500">Developed by</span>
+                <span class="text-base font-medium text-blue-600">Sifat Hasan Apu</span>
+            </p>
+            <p class="mt-6 text-lg text-gray-600">ব্লাড গ্রুপ অনুযায়ী তথ্য খুঁজে বের করুন</p>
+        </header>
+
+        <!-- Search and Filter Section -->
+        <div class="bg-white p-6 rounded-xl shadow-md mb-8 max-w-md mx-auto">
+            <label for="bloodGroupFilter" class="block text-lg font-semibold text-gray-700 mb-2">ব্লাড গ্রুপ নির্বাচন করুন:</label>
+            <div class="relative">
+                <select id="bloodGroupFilter" class="w-full p-3 bg-gray-50 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                    <option value="all">সকল গ্রুপ</option>
+                    <option value="A+">A Positive (A+)</option>
+                    <option value="A-">A Negative (A-)</option>
+                    <option value="B+">B Positive (B+)</option>
+                    <option value="B-">B Negative (B-)</option>
+                    <option value="O+">O Positive (O+)</option>
+                    <option value="O-">O Negative (O-)</option>
+                    <option value="AB+">AB Positive (AB+)</option>
+                    <option value="AB-">AB Negative (AB-)</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg class="fill-current h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Section -->
+        <main id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Employee cards will be dynamically inserted here -->
+        </main>
+        
+        <!-- No results message -->
+        <div id="noResultsMessage" class="hidden text-center py-16">
+            <h3 class="text-2xl font-semibold text-gray-700">কোনো তথ্য পাওয়া যায়নি</h3>
+            <p class="text-gray-500 mt-2">আপনার নির্বাচিত ব্লাড গ্রুপের জন্য কোনো কর্মচারীর তথ্য নেই।</p>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DATA ---
+        // This is the sample data based on your provided image.
+        // You can add, remove, or edit this data as needed.
+        const employeeData = [
+            {
+                employeeId: 3275,
+                name: "Sharif Ahosan Habib Redoy",
+                bloodGroup: "A+",
+                emergencyContact: "1,793,000,679",
+                address: "Khalishpur, Khulna"
+            },
+            {
+                employeeId: 1553,
+                name: "Md. Razaul Karim",
+                bloodGroup: "A+",
+                emergencyContact: "Father Mob no: 01726779857",
+                address: "Vill: Shibpasa, Po: Sholna, Thana: Air port, District: Jashore"
+            },
+            {
+                employeeId: 545,
+                name: "Mohammed Nesrul Islam",
+                bloodGroup: "O+",
+                emergencyContact: "Father-01716042989",
+                address: "House/holding: 811, Village/Road: Mira bari road, Word no: 24"
+            },
+            {
+                employeeId: 1866,
+                name: "Sharif Mahfuzur Rahman",
+                bloodGroup: "O+",
+                emergencyContact: "1,913,933,877",
+                address: "Moheswar pasha,saha para,KUET,daulatpur Khulna"
+            },
+            {
+                employeeId: 366,
+                name: "MD Bulbul Islam",
+                bloodGroup: "A+",
+                emergencyContact: "1,634,083,918",
+                address: "MD Bulbul Islam, C/O MD Nazrul Islam, vill+Post: kalaskathi"
+            },
+            {
+                employeeId: 481,
+                name: "Shuresh Kar",
+                bloodGroup: "A+",
+                emergencyContact: "1,776,762,695",
+                address: "Village: Rasulpur, post: Rakhalgachi, P.S + Dist: Bagerhat"
+            },
+            {
+                employeeId: 1552,
+                name: "Shuvrodeb Halder",
+                bloodGroup: "O+",
+                emergencyContact: "1,760,809,095",
+                address: "Baigdha,Agailjhara,Barisal."
+            },
+            {
+                employeeId: 514,
+                name: "Md. Depu Hossen",
+                bloodGroup: "A+",
+                emergencyContact: "1,743,822,235",
+                address: "Nalua,Bakergonj,Barisal"
+            },
+            {
+                employeeId: 1705,
+                name: "Md Shahin",
+                bloodGroup: "A+",
+                emergencyContact: "1,753,499,658",
+                address: "Chotobogi,Taltali,Barguna"
+            },
+            // --- Newly Added Data from Image ---
+            {
+                employeeId: 3094,
+                name: "Sifat Hasan Apu",
+                bloodGroup: "A+",
+                emergencyContact: "1,736,443,028",
+                address: "Bilashpur, Jhenaigati, Sherpur"
+            },
+            {
+                employeeId: 3323,
+                name: "Hasan",
+                bloodGroup: "O+",
+                emergencyContact: "1,815,304,535",
+                address: "Betagi powrosova 9 no word Kharakanda. Betagi, Barguna"
+            },
+            {
+                employeeId: 1042,
+                name: "Ibrahim Ali",
+                bloodGroup: "B+",
+                emergencyContact: "1,736,896,154",
+                address: "Vill: Kashinathpur, P.O: Shahidnagar, P.S: Shailkupa, Jhenaidah"
+            },
+            {
+                employeeId: 1898,
+                name: "MD IMRAN HOSSAIN MOLLA",
+                bloodGroup: "A+",
+                emergencyContact: "01711117492(Father)",
+                address: "Vill: Chalishia, P.O: Noapara, Abhaynagar, Jashore."
+            },
+            {
+                employeeId: 1287,
+                name: "Faruk Ahmmed",
+                bloodGroup: "B+",
+                emergencyContact: "1,715,233,446",
+                address: "Ghatail, Tangail"
+            },
+            {
+                employeeId: 537,
+                name: "Maruf Ahmed Khan",
+                bloodGroup: "O+",
+                emergencyContact: "1,712,748,652",
+                address: "Vill+P.O:Charadi,P.S:Bakerganj,Barishal"
+            },
+            {
+                employeeId: 2954,
+                name: "Md sobhan sana",
+                bloodGroup: "B+",
+                emergencyContact: "01981686397 Father",
+                address: "Village,Mothabaty,Upazila. Paikgacha. district. Khulna"
+            },
+            {
+                employeeId: 1897,
+                name: "Himangshu ray",
+                bloodGroup: "B+",
+                emergencyContact: "+880 1777-150861",
+                address: "Uttarpara, Boyaliaghat, Monirampur, jashore"
+            },
+            {
+                employeeId: 1867,
+                name: "Md. Safikul Islam",
+                bloodGroup: "A+",
+                emergencyContact: "1,767,805,420",
+                address: "Md. Safikul Islam, Village: Islamdanga, PO: Amba"
+            },
+            {
+                employeeId: 964,
+                name: "Md. Abdul Mozid",
+                bloodGroup: "B+",
+                emergencyContact: "1,715,843,678",
+                address: "Radhanagar,baganpara,Pabna,dist. Pabna"
+            },
+            {
+                employeeId: 1054,
+                name: "Gazi Masuduzzaman (Masud)",
+                bloodGroup: "O+",
+                emergencyContact: "01913041797 (Father)",
+                address: "Barandi Para,Lichu Tala,Kotwali,Jashore"
+            },
+            {
+                employeeId: 1896,
+                name: "Dipta Sarder",
+                bloodGroup: "O+",
+                emergencyContact: "1,714,665,857",
+                address: "Dokkhinpara, Arrongghata, khulna"
+            },
+            {
+                employeeId: 1448,
+                name: "Md Saiful Islam",
+                bloodGroup: "B+",
+                emergencyContact: "1,730,948,066",
+                address: "Vill:Sultanabad,post:Dhamdi,Union:Nazirpur,Upazil"
+            },
+            // --- Newly Added Data (3rd Batch) ---
+            {
+                employeeId: 12522,
+                name: "MD Shamim Mia",
+                bloodGroup: "AB+",
+                emergencyContact: "01612180562(wife)",
+                address: "Bagaili, Sharifpur, Jemalpur Sadar"
+            },
+            {
+                employeeId: 1637,
+                name: "S. M. Shariful Islam",
+                bloodGroup: "A+",
+                emergencyContact: "1,403,725,974",
+                address: "Kumrail, dumuria, khulna"
+            },
+            {
+                employeeId: 765,
+                name: "Md. Enayet Hossen",
+                bloodGroup: "B+",
+                emergencyContact: "1,913,952,500",
+                address: "Village: West Alabad, Faridpur Sadar, Faridpur"
+            },
+            {
+                employeeId: 460,
+                name: "Md Shaheenor Islam",
+                bloodGroup: "AB+",
+                emergencyContact: "Wife-01719090923",
+                address: "Village: Dulvite, PO: Chaparkona, PS: Sarishabari, Dist: Jamalpur"
+            },
+            {
+                employeeId: 562,
+                name: "Dipankar kumar paul",
+                bloodGroup: "B+",
+                emergencyContact: "1,721,923,587",
+                address: "Vill:Kumbolkhali,post:Ayila,P.S:Bauphal,Dist:Patuakhali"
+            },
+            {
+                employeeId: 2390,
+                name: "Md. Reaz Hossen",
+                bloodGroup: "B+",
+                emergencyContact: "1,736,207,132",
+                address: "Village +Post: Middle Nalua, Upazila : Bakergong,District : Barishal."
+            },
+            {
+                employeeId: 1966,
+                name: "Apu Das",
+                bloodGroup: "O+",
+                emergencyContact: "1,712,751,645",
+                address: "Vill - Chaliabunya, PO - Badura Bazar, Union- Armkhole, P.S- Golachipa, Dist - Patuakhali."
+            },
+            {
+                employeeId: 1908,
+                name: "Md Ariful Islam",
+                bloodGroup: "A+",
+                emergencyContact: "01731294526-Father",
+                address: "Vill:piepuliea,thana:santhia,dist:padna,Bangladesh."
+            },
+            {
+                employeeId: 10789,
+                name: "Md. Nurunnabi Mondal",
+                bloodGroup: "O+",
+                emergencyContact: "1,722,938,621",
+                address: "Ganganarayanpur, Bocshigonj, Sadullahpur, Gaibandha"
+            },
+            {
+                employeeId: 637,
+                name: "Md. Naimur Rahman",
+                bloodGroup: "B+",
+                emergencyContact: "1,716,152,392",
+                address: "v: Boadgoan Madrasha Para, PO: Toria, Thana : Atwari, District : Panchagarh"
+            },
+            {
+                employeeId: "N/A",
+                name: "Md.Romizul Islam",
+                bloodGroup: "AB+",
+                emergencyContact: "1,720,542,999",
+                address: "Not specified"
+            }
+        ];
+
+        // --- DATA PROCESSING ---
+        // Format emergency contact numbers: remove commas and add leading '0' if missing.
+        employeeData.forEach(employee => {
+            let contact = String(employee.emergencyContact).trim();
+
+            // First, universally remove all commas.
+            let contactWithoutCommas = contact.replace(/,/g, '');
+            
+            // Check if the result is a pure 10-digit number string
+            if (/^\d{10}$/.test(contactWithoutCommas)) {
+                 // If it is, it's a Bangladeshi number missing the '0'. Prepend it.
+                employee.emergencyContact = '0' + contactWithoutCommas;
+            } else {
+                // Otherwise, just use the version with commas removed.
+                // This handles cases like "Father-017...", "+880...", or already correct numbers.
+                employee.emergencyContact = contactWithoutCommas;
+            }
+        });
+
+
+        // --- DOM ELEMENTS ---
+        const bloodGroupFilter = document.getElementById('bloodGroupFilter');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+
+        // --- FUNCTIONS ---
+        /**
+         * Renders the employee cards on the screen based on the provided data.
+         * @param {Array} dataToRender - An array of employee objects.
+         */
+        function renderEmployeeData(dataToRender) {
+            // Clear previous results
+            resultsContainer.innerHTML = '';
+
+            if (dataToRender.length === 0) {
+                noResultsMessage.classList.remove('hidden');
+                resultsContainer.classList.add('hidden');
+            } else {
+                noResultsMessage.classList.add('hidden');
+                resultsContainer.classList.remove('hidden');
+
+                dataToRender.forEach(employee => {
+                    const card = document.createElement('div');
+                    card.className = 'card p-6 flex flex-col gap-4 fade-in';
+                    
+                    // Card HTML content
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800">${employee.name}</h2>
+                                <p class="text-sm text-gray-500">কর্মচারী আইডি: ${employee.employeeId}</p>
+                            </div>
+                            <div class="blood-tag">${employee.bloodGroup}</div>
+                        </div>
+                        
+                        <div class="border-t border-gray-200 pt-4 space-y-3 text-gray-700">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon text-red-500"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
+                                <span>জরুরী যোগাযোগ: <strong class="font-semibold">${employee.emergencyContact}</strong></span>
+                            </div>
+                            <div class="flex items-start">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon text-blue-500"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                                <span>স্থায়ী ঠিকানা: <span class="font-medium">${employee.address}</span></span>
+                            </div>
+                        </div>
+                    `;
+                    resultsContainer.appendChild(card);
+                });
+            }
+        }
+        
+        /**
+         * Handles the filtering logic when the dropdown selection changes.
+         */
+        function handleFilterChange() {
+            const selectedGroup = bloodGroupFilter.value;
+            let filteredData;
+
+            if (selectedGroup === 'all') {
+                filteredData = employeeData;
+            } else {
+                filteredData = employeeData.filter(employee => employee.bloodGroup === selectedGroup);
+            }
+            renderEmployeeData(filteredData);
+        }
+
+        // --- EVENT LISTENERS ---
+        bloodGroupFilter.addEventListener('change', handleFilterChange);
+
+        // --- INITIAL RENDER ---
+        // Display all employees and total count when the page first loads.
+        window.addEventListener('DOMContentLoaded', () => {
+            renderEmployeeData(employeeData);
+        });
+    </script>
+</body>
+</html>
+
